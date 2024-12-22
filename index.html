@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Processor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #1c1c1c;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .editor-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #1c1c1c;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background-color: transparent;
+            border: 2px solid #666666;
+            border-radius: 25px;
+        }
+
+        .toolbar-btn {
+            background-color: #666666;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background-color: #bdd6ff;
+            color: #1c1c1c;
+        }
+
+        .editor {
+            width: 100%;
+            min-height: 70vh;
+            padding: 20px;
+            background-color: transparent;
+            border: 2px solid #666666;
+            border-radius: 25px;
+            color: white;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        .editor:focus {
+            border-color: #bdd6ff;
+        }
+
+        .status-bar {
+            margin-top: 10px;
+            padding: 10px 20px;
+            color: #666666;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="toolbar">
+            <button class="toolbar-btn" onclick="formatText('bold')">B</button>
+            <button class="toolbar-btn" onclick="formatText('italic')">I</button>
+            <button class="toolbar-btn" onclick="formatText('underline')">U</button>
+            <button class="toolbar-btn" onclick="alignText('left')">←</button>
+            <button class="toolbar-btn" onclick="alignText('center')">⚌</button>
+            <button class="toolbar-btn" onclick="alignText('right')">→</button>
+            <button class="toolbar-btn" onclick="saveDocument()">Save</button>
+        </div>
+        <div class="editor" contenteditable="true" id="editor"></div>
+        <div class="status-bar">
+            <span id="wordCount">Words: 0</span>
+            <span id="charCount">Characters: 0</span>
+        </div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const wordCountElement = document.getElementById('wordCount');
+        const charCountElement = document.getElementById('charCount');
+
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            editor.focus();
+        }
+
+        function alignText(alignment) {
+            document.execCommand('justify' + alignment.charAt(0).toUpperCase() + alignment.slice(1), false, null);
+            editor.focus();
+        }
+
+        function updateCounts() {
+            const text = editor.innerText || '';
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const chars = text.length;
+
+            wordCountElement.textContent = `Words: ${words}`;
+            charCountElement.textContent = `Characters: ${chars}`;
+        }
+
+        function saveDocument() {
+            const content = editor.innerHTML;
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        editor.addEventListener('input', updateCounts);
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
+    </script>
+</body>
+</html>
