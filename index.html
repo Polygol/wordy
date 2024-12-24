@@ -141,6 +141,31 @@
             justify-content: space-between;
         }
 
+    .file-input {
+        display: none;
+    }
+
+    .toolbar-btn.active {
+        background-color: #bdd6ff;
+        color: #1c1c1c;
+    }
+        
+    .open-file-label {
+        background-color: #666666;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 8px 15px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+    }
+
+    .open-file-label:hover {
+        background-color: #bdd6ff;
+        color: #1c1c1c;
+    }
+        
         .font-inter { font-family: 'Inter', sans-serif; }
         .font-roboto { font-family: 'Roboto', sans-serif; }
         .font-opensans { font-family: 'Open Sans', sans-serif; }
@@ -151,12 +176,13 @@
 <body>
     <div class="editor-container">
         <div class="toolbar">
-            <div class="formatting-group">
-                <button class="toolbar-btn" onclick="formatText('bold')">𝗕</button>
-                <button class="toolbar-btn" onclick="formatText('italic')">𝘪</button>
-                <button class="toolbar-btn" onclick="formatText('underline')">Ḻ</button>
-                <button class="toolbar-btn" onclick="formatText('strikethrough')">ᵺ</button>
-            </div>
+<div class="formatting-group">
+    <button class="toolbar-btn" id="boldBtn" onclick="formatText('bold')">B</button>
+    <button class="toolbar-btn" id="italicBtn" onclick="formatText('italic')">I</button>
+    <button class="toolbar-btn" id="underlineBtn" onclick="formatText('underline')">U</button>
+    <button class="toolbar-btn" id="strikeBtn" onclick="formatText('strikethrough')">S</button>
+    <button class="toolbar-btn" onclick="resetFormatting()">Reset</button>
+</div>
 
             <div class="formatting-group">
                 <select id="fontFamily" onchange="changeFont()">
@@ -188,6 +214,8 @@
             </div>
 
             <div class="formatting-group">
+                <input type="file" id="fileInput" class="file-input" accept=".html">
+                <label for="fileInput" class="open-file-label">Open</label>
                 <button class="toolbar-btn" onclick="toggleMarkdownPreview()">View</button>
                 <button class="toolbar-btn" onclick="saveDocument()">Save</button>
             </div>
@@ -205,42 +233,89 @@
         const wordCountElement = document.getElementById('wordCount');
         const charCountElement = document.getElementById('charCount');
 
-        function formatText(command) {
-            document.execCommand(command, false, null);
-            editor.focus();
-        }
+    function applyDefaultFormatting() {
+        editor.style.fontFamily = 'Inter, sans-serif';
+        editor.style.fontSize = '1rem';
+    }
 
-        function changeFont() {
-            const font = document.getElementById('fontFamily').value;
-            document.execCommand('fontName', false, font);
-            editor.focus();
-        }
+    function updateButtonStates() {
+        document.getElementById('boldBtn').classList.toggle('active', document.queryCommandState('bold'));
+        document.getElementById('italicBtn').classList.toggle('active', document.queryCommandState('italic'));
+        document.getElementById('underlineBtn').classList.toggle('active', document.queryCommandState('underline'));
+        document.getElementById('strikeBtn').classList.toggle('active', document.queryCommandState('strikethrough'));
+    }
+        
+    function formatText(command) {
+        document.execCommand(command, false, null);
+        updateButtonStates();
+        editor.focus();
+    }
 
-        function changeFontSize() {
-            const size = document.getElementById('fontSize').value;
-            document.execCommand('fontSize', false, size);
-            editor.focus();
-        }
+    function changeFont() {
+        const font = document.getElementById('fontFamily').value;
+        editor.style.fontFamily = `${font}, sans-serif`;
+    }
 
+    function resetFormatting() {
+        editor.innerHTML = editor.innerText;
+        applyDefaultFormatting();
+        updateButtonStates();
+    }
+        
+    function changeFontSize() {
+        const size = document.getElementById('fontSize').value;
+        const sizes = ['0.8rem', '1rem', '1.2rem', '1.4rem', '1.6rem'];
+        editor.style.fontSize = sizes[size - 1];
+    }
+
+    let autosaveTimeout;
+    function autosave() {
+        clearTimeout(autosaveTimeout);
+        autosaveTimeout = setTimeout(() => {
+            localStorage.setItem('editorContent', editor.innerHTML);
+            localStorage.setItem('lastSaved', new Date().toISOString());
+        }, 1000);
+    }
+
+    if (localStorage.getItem('editorContent')) {
+        editor.innerHTML = localStorage.getItem('editorContent');
+    }
+        
         function changeColor(command, value) {
             document.execCommand(command, false, value);
             editor.focus();
         }
 
-        function toggleMarkdownPreview() {
-            if (!isPreviewMode) {
-                const markdown = editor.innerText;
-                const html = marked.parse(markdown);
-                editor.innerHTML = html;
-                editor.classList.add('preview-mode');
-                editor.contentEditable = false;
-            } else {
-                editor.innerHTML = editor.innerText;
-                editor.classList.remove('preview-mode');
-                editor.contentEditable = true;
-            }
-            isPreviewMode = !isPreviewMode;
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                editor.innerHTML = e.target.result;
+                applyDefaultFormatting();
+            };
+            reader.readAsText(file);
         }
+    });
+
+    function toggleMarkdownPreview() {
+        if (!isPreviewMode) {
+            const markdown = editor.innerText;
+            const html = marked.parse(markdown);
+            const previewDiv = document.createElement('div');
+            previewDiv.innerHTML = html;
+            previewDiv.className = 'preview-mode';
+            editor.parentNode.insertBefore(previewDiv, editor);
+            editor.style.display = 'none';
+        } else {
+            const previewDiv = document.querySelector('.preview-mode');
+            if (previewDiv) {
+                previewDiv.remove();
+            }
+            editor.style.display = 'block';
+        }
+        isPreviewMode = !isPreviewMode;
+    }
         
         function alignText(alignment) {
             document.execCommand('justify' + alignment.charAt(0).toUpperCase() + alignment.slice(1), false, null);
@@ -269,12 +344,37 @@
             URL.revokeObjectURL(url);
         }
 
+    window.onload = function() {
+        document.getElementById('fontFamily').value = 'Inter';
+        document.getElementById('fontSize').value = '2';
+        applyDefaultFormatting();
+    }
+
+    editor.addEventListener('mouseup', updateButtonStates);
+    editor.addEventListener('keyup', updateButtonStates);
+        
+    window.addEventListener('load', function() {
+        if (localStorage.getItem('editorContent')) {
+            editor.innerHTML = localStorage.getItem('editorContent');
+        }
+        updateButtonStates();
+    });
+        
         editor.addEventListener('input', updateCounts);
         editor.addEventListener('paste', (e) => {
             e.preventDefault();
             const text = e.clipboardData.getData('text/plain');
             document.execCommand('insertText', false, text);
         });
+
+    editor.addEventListener('input', function() {
+        updateCounts();
+        autosave();
+        updateButtonStates();
+    });
+
+    editor.addEventListener('mouseup', updateButtonStates);
+    editor.addEventListener('keyup', updateButtonStates);
     </script>
 </body>
 </html>
