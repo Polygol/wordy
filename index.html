@@ -165,6 +165,96 @@
         background-color: #bdd6ff;
         color: #1c1c1c;
     }
+
+        .preview {
+            width: 50%;
+            min-height: 70vh;
+            padding: 20px;
+            background-color: transparent;
+            border: 2px solid #666666;
+            border-radius: 25px;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .preview h1, .preview h2, .preview h3 {
+            margin: 1em 0 0.5em 0;
+            color: #bdd6ff;
+        }
+
+        .preview p {
+            margin: 1em 0;
+        }
+
+        .preview code {
+            background-color: #2a2a2a;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .preview pre {
+            background-color: #2a2a2a;
+            padding: 1em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .preview ul, .preview ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+
+        .preview blockquote {
+            border-left: 4px solid #666666;
+            margin: 1em 0;
+            padding-left: 1em;
+            color: #aaaaaa;
+        }
+
+.preview table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+}
+
+.preview th, .preview td {
+    border: 1px solid #666666;
+    padding: 8px;
+    text-align: left;
+}
+
+.preview th {
+    background-color: #2a2a2a;
+}
+
+.preview input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.preview img {
+    max-width: 100%;
+    height: auto;
+    margin: 1em 0;
+}
+
+.preview hr {
+    border: none;
+    border-top: 2px solid #666666;
+    margin: 2em 0;
+}
+
+#imageInput {
+    display: none;
+}
+
+.preview img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em 0;
+}
         
         .font-inter { font-family: 'Inter', sans-serif; }
         .font-roboto { font-family: 'Roboto', sans-serif; }
@@ -175,249 +265,200 @@
 </head>
 <body>
     <div class="editor-container">
-        <div class="toolbar">
-<div class="formatting-group">
-    <button class="toolbar-btn" id="boldBtn" onclick="formatText('bold')">Bold</button>
-    <button class="toolbar-btn" id="italicBtn" onclick="formatText('italic')">Italic</button>
-    <button class="toolbar-btn" id="underlineBtn" onclick="formatText('underline')">Underline</button>
-    <button class="toolbar-btn" id="strikeBtn" onclick="formatText('strikethrough')">Strikethrough</button>
-    <button class="toolbar-btn" onclick="resetFormatting()">Reset</button>
+<div class="toolbar">
+    <!-- Headers -->
+    <button class="toolbar-btn" onclick="insertMarkdown('# ')">H1</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('## ')">H2</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('### ')">H3</button>
+    
+    <!-- Text formatting -->
+    <button class="toolbar-btn" onclick="insertMarkdown('**', '**')">Bold</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('*', '*')">Italic</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('~~', '~~')">Strike</button>
+    
+    <!-- Lists -->
+    <button class="toolbar-btn" onclick="insertMarkdown('- ')">•</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('1. ')">1.</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('- [ ] ')">☐</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('- [x] ')">☑</button>
+    
+    <!-- Code -->
+    <button class="toolbar-btn" onclick="insertMarkdown('`', '`')">Code</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('```\n', '\n```')">Block</button>
+    
+    <!-- Links and Media -->
+    <button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')">Link</button>
+<button class="toolbar-btn" onclick="insertMarkdown('![', '](url)')">Image</button>
+<input type="file" id="imageInput" class="file-input" accept="image/*">
+<label for="imageInput" class="toolbar-btn">Upload Image</label>
+    
+    <!-- Quotes and Dividers -->
+    <button class="toolbar-btn" onclick="insertMarkdown('> ')">Quote</button>
+    <button class="toolbar-btn" onclick="insertMarkdown('\n---\n')">Line</button>
+    
+    <!-- Tables -->
+    <button class="toolbar-btn" onclick="insertTable()">Table</button>
+    
+    <!-- File Operations -->
+    <button class="toolbar-btn" onclick="saveDocument()">Save</button>
+    <input type="file" id="fileInput" class="file-input" accept=".md,.txt">
+    <label for="fileInput" class="toolbar-btn">Open</label>
 </div>
 
-    <div class="formatting-group">
-        <button class="toolbar-btn" onclick="addMarkdown('heading1')"># H1</button>
-        <button class="toolbar-btn" onclick="addMarkdown('heading2')">## H2</button>
-        <button class="toolbar-btn" onclick="addMarkdown('heading3')">### H3</button>
+    <div class="editor-container">
+        <textarea id="editor" class="editor" spellcheck="true"></textarea>
+        <div id="preview" class="preview"></div>
     </div>
 
-    <div class="formatting-group">
-        <button class="toolbar-btn" onclick="addMarkdown('list')">• List</button>
-        <button class="toolbar-btn" onclick="addMarkdown('code')">Code</button>
-        <button class="toolbar-btn" onclick="addMarkdown('quote')">Quote</button>
-    </div>
-            
-            <div class="formatting-group">
-                <select id="fontFamily" onchange="changeFont()">
-                    <option value="Inter">Inter</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Noto Serif">Noto Serif</option>
-                    <option value="Roboto Mono">Roboto Mono</option>
-                </select>
-                
-                <select id="fontSize" onchange="changeFontSize()">
-                    <option value="1">Small</option>
-                    <option value="2">Normal</option>
-                    <option value="3">Large</option>
-                    <option value="4">Larger</option>
-                    <option value="5">Largest</option>
-                </select>
-            </div>
-            
-<div class="formatting-group">
-    <button class="toolbar-btn" onclick="document.getElementById('textColor').click()">Color</button>
-    <button class="toolbar-btn" onclick="document.getElementById('highlightColor').click()">Highlight</button>
-    <input type="color" class="color-picker" id="textColor" onchange="changeColor('foreColor', this.value)" style="display: none;">
-    <input type="color" class="color-picker" id="highlightColor" onchange="changeColor('hiliteColor', this.value)" style="display: none;">
-</div>
-
-            <div class="formatting-group">
-                <button class="toolbar-btn" onclick="alignText('left')">🡠</button>
-                <button class="toolbar-btn" onclick="alignText('center')">⚌</button>
-                <button class="toolbar-btn" onclick="alignText('right')">🡢</button>
-            </div>
-
-    <div class="formatting-group">
-        <button class="toolbar-btn" onclick="resetFormatting()">Reset</button>
-        <button class="toolbar-btn" onclick="saveDocument()">Save</button>
-        <input type="file" id="fileInput" class="file-input" accept=".html">
-        <label for="fileInput" class="toolbar-btn">Open</label>
-    </div>
-</div>
-                            
-        <div class="editor" contenteditable="true" id="editor"></div>
         <div class="status-bar">
             <span id="wordCount">Words: 0</span>
             <span id="charCount">Characters: 0</span>
         </div>
-    </div>
 
     <script>
         const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
         const wordCountElement = document.getElementById('wordCount');
         const charCountElement = document.getElementById('charCount');
 
-    function applyDefaultFormatting() {
-        editor.style.fontFamily = 'Inter, sans-serif';
-        editor.style.fontSize = '1rem';
-    }
+        // Set up marked options
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
 
-function addMarkdown(type) {
-    const selection = window.getSelection();
-    const range = selection.getRangeAt(0);
-    const selectedText = selection.toString();
-    let markdown = '';
+        function updatePreview() {
+            const markdown = editor.value;
+            preview.innerHTML = marked.parse(markdown);
+            updateCounts();
+            autosave();
+        }
 
-    switch(type) {
-        case 'heading1':
-            markdown = `# ${selectedText || 'Heading 1'}\n`;
-            break;
-        case 'heading2':
-            markdown = `## ${selectedText || 'Heading 2'}\n`;
-            break;
-        case 'heading3':
-            markdown = `### ${selectedText || 'Heading 3'}\n`;
-            break;
-        case 'list':
-            markdown = selectedText ? selectedText.split('\n').map(line => `* ${line}`).join('\n') : '* List item\n';
-            break;
-        case 'code':
-            markdown = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`` : '```\ncode block\n```';
-            break;
-        case 'quote':
-            markdown = selectedText ? selectedText.split('\n').map(line => `> ${line}`).join('\n') : '> Quote\n';
-            break;
-    }
-
-    const textNode = document.createTextNode(markdown);
-    range.deleteContents();
-    range.insertNode(textNode);
-    editor.normalize();
+function insertTable() {
+    const tableTemplate = `
+| Header 1 | Header 2 | Header 3 |
+|----------|----------|----------|
+| Cell 1   | Cell 2   | Cell 3   |
+| Cell 4   | Cell 5   | Cell 6   |
+`;
+    insertMarkdown(tableTemplate);
 }
         
-    function updateButtonStates() {
-        document.getElementById('boldBtn').classList.toggle('active', document.queryCommandState('bold'));
-        document.getElementById('italicBtn').classList.toggle('active', document.queryCommandState('italic'));
-        document.getElementById('underlineBtn').classList.toggle('active', document.queryCommandState('underline'));
-        document.getElementById('strikeBtn').classList.toggle('active', document.queryCommandState('strikethrough'));
-    }
-        
-    function formatText(command) {
-        document.execCommand(command, false, null);
-        updateButtonStates();
-        editor.focus();
-    }
+        function insertMarkdown(prefix, suffix = '') {
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const text = editor.value;
+            const selection = text.substring(start, end);
+            
+            let insertion;
+            if (selection) {
+                insertion = prefix + selection + suffix;
+            } else {
+                insertion = prefix;
+            }
 
-    function changeFont() {
-        const font = document.getElementById('fontFamily').value;
-        editor.style.fontFamily = `${font}, sans-serif`;
-    }
-
-    function resetFormatting() {
-        editor.innerHTML = editor.innerText;
-        applyDefaultFormatting();
-        updateButtonStates();
-    }
-        
-    function changeFontSize() {
-        const size = document.getElementById('fontSize').value;
-        const sizes = ['0.8rem', '1rem', '1.2rem', '1.4rem', '1.6rem'];
-        editor.style.fontSize = sizes[size - 1];
-    }
-
-    let autosaveTimeout;
-    function autosave() {
-        clearTimeout(autosaveTimeout);
-        autosaveTimeout = setTimeout(() => {
-            localStorage.setItem('editorContent', editor.innerHTML);
-            localStorage.setItem('lastSaved', new Date().toISOString());
-        }, 1000);
-    }
-
-    if (localStorage.getItem('editorContent')) {
-        editor.innerHTML = localStorage.getItem('editorContent');
-    }
-        
-        function changeColor(command, value) {
-            document.execCommand(command, false, value);
+            editor.value = text.substring(0, start) + insertion + text.substring(end);
             editor.focus();
-        }
-
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                editor.innerHTML = e.target.result;
-                applyDefaultFormatting();
-            };
-            reader.readAsText(file);
-        }
-    });
-        
-        function alignText(alignment) {
-            document.execCommand('justify' + alignment.charAt(0).toUpperCase() + alignment.slice(1), false, null);
-            editor.focus();
+            
+            // Set cursor position
+            if (selection) {
+                editor.selectionStart = start;
+                editor.selectionEnd = start + insertion.length;
+            } else {
+                editor.selectionStart = editor.selectionEnd = start + prefix.length;
+            }
+            
+            updatePreview();
         }
 
         function updateCounts() {
-            const text = editor.innerText || '';
+            const text = editor.value;
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
             const chars = text.length;
-
-            let isPreviewMode = false;
-
+            
             wordCountElement.textContent = `Words: ${words}`;
             charCountElement.textContent = `Characters: ${chars}`;
         }
 
-function saveDocument() {
-    // Get current date in YYYY-MM-DD format
-    const timestamp = new Date().toISOString().slice(0,10);
-    
-    // Prompt for filename with default name
-    const filename = prompt('Enter filename:', `document-${timestamp}.html`);
-    if (!filename) return;  // User cancelled
+        function saveDocument() {
+            const timestamp = new Date().toISOString().slice(0,10);
+            const filename = prompt('Enter filename:', `document-${timestamp}.md`);
+            if (!filename) return;
 
-    // Save the HTML content
-    const content = editor.innerHTML;
-    const blob = new Blob([content], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-    window.onload = function() {
-        document.getElementById('fontFamily').value = 'Inter';
-        document.getElementById('fontSize').value = '2';
-        applyDefaultFormatting();
-    }
-
-    editor.addEventListener('mouseup', updateButtonStates);
-    editor.addEventListener('keyup', updateButtonStates);
-
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        saveDocument();
-    }
-});
-        
-    window.addEventListener('load', function() {
-        if (localStorage.getItem('editorContent')) {
-            editor.innerHTML = localStorage.getItem('editorContent');
+            const content = editor.value;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
         }
-        updateButtonStates();
-    });
-        
-        editor.addEventListener('input', updateCounts);
-        editor.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = e.clipboardData.getData('text/plain');
-            document.execCommand('insertText', false, text);
+
+        function autosave() {
+            localStorage.setItem('markdownContent', editor.value);
+            localStorage.setItem('lastSaved', new Date().toISOString());
+        }
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64String = e.target.result;
+            const imageMarkdown = `![${file.name}](${base64String})`;
+            
+            // Insert at cursor position
+            const cursorPos = editor.selectionStart;
+            const textBefore = editor.value.substring(0, cursorPos);
+            const textAfter = editor.value.substring(cursorPos);
+            
+            editor.value = textBefore + imageMarkdown + textAfter;
+            updatePreview();
+            
+            // Reset the input
+            event.target.value = '';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+    
+        // File opening
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    editor.value = e.target.result;
+                    updatePreview();
+                };
+                reader.readAsText(file);
+            }
         });
 
-    editor.addEventListener('input', function() {
-        updateCounts();
-        autosave();
-        updateButtonStates();
-    });
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveDocument();
+            }
+        });
 
-    editor.addEventListener('mouseup', updateButtonStates);
-    editor.addEventListener('keyup', updateButtonStates);
+        // Load autosaved content
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('markdownContent')) {
+                editor.value = localStorage.getItem('markdownContent');
+                updatePreview();
+            }
+        });
+
+        // Live preview update
+        editor.addEventListener('input', updatePreview);
+
+document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+        
+        // Initial preview
+        updatePreview();
     </script>
 </body>
 </html>
