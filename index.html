@@ -286,6 +286,21 @@ body {
 
         let isPreviewMode = false;
 
+// Function to disable/enable toolbar buttons
+function setToolbarState(disabled) {
+    const buttons = document.querySelectorAll('.toolbar-btn:not(#previewToggle)');
+    buttons.forEach(button => {
+        button.disabled = disabled;
+        if (disabled) {
+            button.style.opacity = '0.5';
+            button.style.cursor = 'not-allowed';
+        } else {
+            button.style.opacity = '1';
+            button.style.cursor = 'pointer';
+        }
+    });
+}
+        
         // Set up marked options
         marked.setOptions({
             breaks: true,
@@ -360,11 +375,21 @@ function insertTable() {
             URL.revokeObjectURL(url);
         }
 
-        function autosave() {
-            localStorage.setItem('markdownContent', editor.value);
-            localStorage.setItem('lastSaved', new Date().toISOString());
-        }
+function autosave() {
+    if (!isPreviewMode) {  // Only autosave when in edit mode
+        localStorage.setItem('markdownContent', editor.value);
+        localStorage.setItem('lastSaved', new Date().toISOString());
+    }
+}
 
+setInterval(autosave, 5000); // Autosave every 5 seconds
+
+let saveTimeout;
+editor.addEventListener('input', function() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(autosave, 1000); // Save 1 second after last keystroke
+});
+        
 function handleImageUpload(event) {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
@@ -398,10 +423,14 @@ previewToggle.addEventListener('click', function() {
         editor.classList.add('hidden');
         preview.classList.remove('hidden');
         toggleIcon.textContent = 'edit';
+        editor.readOnly = true;  // Disable typing in editor
+        setToolbarState(true);   // Disable toolbar buttons
     } else {
         editor.classList.remove('hidden');
         preview.classList.add('hidden');
         toggleIcon.textContent = 'preview';
+        editor.readOnly = false;  // Enable typing in editor
+        setToolbarState(false);   // Enable toolbar buttons
     }
     
     updatePreview();
