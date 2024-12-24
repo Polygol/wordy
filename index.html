@@ -469,6 +469,10 @@ previewToggle.addEventListener('click', function() {
         editor.addEventListener('input', updatePreview);
 
 document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+
+// Update the image button to trigger file input
+document.querySelector('.toolbar-btn[onclick="insertMarkdown(\'![', \'](url)\')"]')
+    .setAttribute('onclick', 'document.getElementById("imageInput").click()');
         
         // Initial preview
         updatePreview();
