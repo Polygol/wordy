@@ -510,7 +510,8 @@ window.addEventListener('load', function() {
 document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
 // Update the image button to trigger file input
-document.querySelector('.toolbar-btn[onclick="insertMarkdown(\'![', \'](url)\')"]')
+document.querySelector('.toolbar-btn span.material-symbols-rounded:not(.hidden)')
+    .closest('.toolbar-btn[onclick*="!["]')
     .setAttribute('onclick', 'document.getElementById("imageInput").click()');
         
         // Initial preview
