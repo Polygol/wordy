@@ -30,6 +30,14 @@
             width: 100%;
             max-width: 800px;
             background-color: #1c1c1c;
+            display: flex;
+            gap: 20px;
+        }
+
+        .editor-preview-container {
+            width: 100%;
+            display: flex;
+            gap: 20px;
         }
 
         .toolbar {
@@ -255,6 +263,10 @@
     display: block;
     margin: 1em 0;
 }
+
+.full-width {
+    width: 100% !important;
+}
         
         .font-inter { font-family: 'Inter', sans-serif; }
         .font-roboto { font-family: 'Roboto', sans-serif; }
@@ -300,26 +312,31 @@
     <button class="toolbar-btn" onclick="insertTable()">Table</button>
     
     <!-- File Operations -->
+    <button class="toolbar-btn" id="previewToggle">Preview</button>
     <button class="toolbar-btn" onclick="saveDocument()">Save</button>
     <input type="file" id="fileInput" class="file-input" accept=".md,.txt">
     <label for="fileInput" class="toolbar-btn">Open</label>
 </div>
 
-    <div class="editor-container">
+<div class="editor-container">
+    <div class="editor-preview-container">
         <textarea id="editor" class="editor" spellcheck="true"></textarea>
-        <div id="preview" class="preview"></div>
+        <div id="preview" class="preview hidden"></div>
     </div>
-
-        <div class="status-bar">
-            <span id="wordCount">Words: 0</span>
-            <span id="charCount">Characters: 0</span>
-        </div>
+    <div class="status-bar">
+        <span id="wordCount">Words: 0</span>
+        <span id="charCount">Characters: 0</span>
+    </div>
+</div>
 
     <script>
         const editor = document.getElementById('editor');
         const preview = document.getElementById('preview');
         const wordCountElement = document.getElementById('wordCount');
         const charCountElement = document.getElementById('charCount');
+        const previewToggle = document.getElementById('previewToggle');
+
+        let isPreviewMode = false;
 
         // Set up marked options
         marked.setOptions({
@@ -422,7 +439,26 @@ function handleImageUpload(event) {
         reader.readAsDataURL(file);
     }
 }
+
+previewToggle.addEventListener('click', function() {
+    isPreviewMode = !isPreviewMode;
+    previewToggle.classList.toggle('active');
     
+    if (isPreviewMode) {
+        editor.classList.add('hidden');
+        preview.classList.remove('hidden');
+        preview.classList.add('full-width');
+        previewToggle.textContent = 'Edit';
+    } else {
+        editor.classList.remove('hidden');
+        preview.classList.add('hidden');
+        preview.classList.remove('full-width');
+        previewToggle.textContent = 'Preview';
+    }
+    
+    updatePreview();
+});
+        
         // File opening
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
