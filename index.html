@@ -69,6 +69,8 @@ body {
     background-color: #666666;
     color: white;
     border: none;
+    align-items: center;
+    justify-content: center;
     border-radius: 25px;
     padding: 8px 15px;
     cursor: pointer;
@@ -205,6 +207,13 @@ body {
     display: none !important;
 }
 
+.toolbar-btn:nth-child(2),
+.toolbar-btn:nth-child(3),
+.toolbar-btn:nth-child(4) {
+    width: auto;
+    padding: 8px 15px;
+}
+        
 .font-inter { font-family: 'Inter', sans-serif; }
 .font-roboto { font-family: 'Roboto', sans-serif; }
 .font-opensans { font-family: 'Open Sans', sans-serif; }
@@ -383,16 +392,16 @@ previewToggle.addEventListener('click', function() {
     isPreviewMode = !isPreviewMode;
     previewToggle.classList.toggle('active');
     
+    const toggleIcon = previewToggle.querySelector('.material-symbols-rounded');
+    
     if (isPreviewMode) {
         editor.classList.add('hidden');
         preview.classList.remove('hidden');
-        preview.classList.add('full-width');
-        previewToggle.textContent = 'Edit';
+        toggleIcon.textContent = 'edit';
     } else {
         editor.classList.remove('hidden');
         preview.classList.add('hidden');
-        preview.classList.remove('full-width');
-        previewToggle.textContent = 'Preview';
+        toggleIcon.textContent = 'preview';
     }
     
     updatePreview();
