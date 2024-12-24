@@ -260,7 +260,9 @@ body {
     <!-- Tables -->
     <button class="toolbar-btn" onclick="insertTable()"><span class="material-symbols-rounded">table</span></button>
     
-    <!-- File Operations -->
+    <!-- File Operations and Undo Redo -->
+    <button class="toolbar-btn" id="undoButton" disabled><span class="material-symbols-rounded">undo</span></button>
+    <button class="toolbar-btn" id="redoButton" disabled><span class="material-symbols-rounded">redo</span></button>
     <button class="toolbar-btn" onclick="saveDocument()"><span class="material-symbols-rounded">save</span></button>
     <input type="file" id="fileInput" class="file-input" accept=".md,.txt">
     <label for="fileInput" class="toolbar-btn"><span class="material-symbols-rounded">folder_open</span></label>
@@ -321,6 +323,56 @@ function updatePreview() {
     autosave();
 }
 
+// History handling
+let history = [];
+let currentHistoryIndex = -1;
+const maxHistoryStates = 100;
+
+function saveToHistory(content) {
+    // Remove any future redos
+    history = history.slice(0, currentHistoryIndex + 1);
+    
+    // Add new state
+    history.push(content);
+    currentHistoryIndex++;
+    
+    // Limit history size
+    if (history.length > maxHistoryStates) {
+        history.shift();
+        currentHistoryIndex--;
+    }
+    
+    // Update buttons state
+    updateUndoRedoButtons();
+    
+    // Save history to localStorage
+    localStorage.setItem('editorHistory', JSON.stringify(history));
+    localStorage.setItem('editorHistoryIndex', currentHistoryIndex);
+}
+
+function updateUndoRedoButtons() {
+    document.getElementById('undoButton').disabled = currentHistoryIndex <= 0;
+    document.getElementById('redoButton').disabled = currentHistoryIndex >= history.length - 1;
+}
+
+function undo() {
+    if (currentHistoryIndex > 0) {
+        currentHistoryIndex--;
+        editor.value = history[currentHistoryIndex];
+        updatePreview();
+        updateUndoRedoButtons();
+    }
+}
+
+function redo() {
+    if (currentHistoryIndex < history.length - 1) {
+        currentHistoryIndex++;
+        editor.value = history[currentHistoryIndex];
+        updatePreview();
+        updateUndoRedoButtons();
+    }
+}
+        
 function insertTable() {
     const tableTemplate = `
 | Header 1 | Header 2 | Header 3 |
@@ -401,6 +453,10 @@ function autosave() {
         });
         localStorage.setItem('markdownContentFull', fullContent);
         localStorage.setItem('lastSaved', new Date().toISOString());
+        
+        // Save history
+        localStorage.setItem('editorHistory', JSON.stringify(history));
+        localStorage.setItem('editorHistoryIndex', currentHistoryIndex);
     }
 }
 
@@ -408,8 +464,10 @@ setInterval(autosave, 5000); // Autosave every 5 seconds
 
 let saveTimeout;
 editor.addEventListener('input', function() {
+    saveToHistory(editor.value);
+    updatePreview();
     clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(autosave, 1000); // Save 1 second after last keystroke
+    saveTimeout = setTimeout(autosave, 1000);
 });
         
 function handleImageUpload(event) {
@@ -487,19 +545,20 @@ previewToggle.addEventListener('click', function() {
 
         // Load autosaved content
 window.addEventListener('load', function() {
-    const savedContent = localStorage.getItem('markdownContentFull');
-    if (savedContent) {
-        // Extract and store any base64 images
-        savedContent.replace(/!\[([^\]]+)\]\((data:image[^)]+)\)/g, (match, filename, base64Data) => {
-            const imageId = `img_${Date.now()}`;
-            localStorage.setItem(imageId, base64Data);
-            return `![${filename}](#${imageId})`;
-        });
-        
-        editor.value = savedContent.replace(/!\[([^\]]+)\]\((data:image[^)]+)\)/g, (match, filename, base64Data) => {
-            const imageId = `img_${Date.now()}`;
-            return `![${filename}](#${imageId})`;
-        });
+    const savedHistory = localStorage.getItem('editorHistory');
+    const savedIndex = localStorage.getItem('editorHistoryIndex');
+    
+    if (savedHistory && savedIndex) {
+        history = JSON.parse(savedHistory);
+        currentHistoryIndex = parseInt(savedIndex);
+        updateUndoRedoButtons();
+    }
+    
+    // Load the last saved content
+    if (localStorage.getItem('markdownContentFull')) {
+        const savedContent = localStorage.getItem('markdownContentFull');
+        editor.value = savedContent;
+        saveToHistory(savedContent); // Add initial state to history
         updatePreview();
     }
 });
@@ -509,6 +568,23 @@ window.addEventListener('load', function() {
 
 document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
+document.getElementById('undoButton').addEventListener('click', undo);
+document.getElementById('redoButton').addEventListener('click', redo);
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+            redo();
+        } else {
+            undo();
+        }
+    } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault();
+        redo();
+    }
+});
+        
 // Update the image button to trigger file input
 document.getElementById('imageButton')
     .setAttribute('onclick', 'document.getElementById("imageInput").click()');
