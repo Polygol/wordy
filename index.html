@@ -177,10 +177,10 @@
     <div class="editor-container">
         <div class="toolbar">
 <div class="formatting-group">
-    <button class="toolbar-btn" id="boldBtn" onclick="formatText('bold')">B</button>
-    <button class="toolbar-btn" id="italicBtn" onclick="formatText('italic')">I</button>
-    <button class="toolbar-btn" id="underlineBtn" onclick="formatText('underline')">U</button>
-    <button class="toolbar-btn" id="strikeBtn" onclick="formatText('strikethrough')">S</button>
+    <button class="toolbar-btn" id="boldBtn" onclick="formatText('bold')">Bold</button>
+    <button class="toolbar-btn" id="italicBtn" onclick="formatText('italic')">Italic</button>
+    <button class="toolbar-btn" id="underlineBtn" onclick="formatText('underline')">Underline</button>
+    <button class="toolbar-btn" id="strikeBtn" onclick="formatText('strikethrough')">Strikethrough</button>
     <button class="toolbar-btn" onclick="resetFormatting()">Reset</button>
 </div>
 
@@ -202,10 +202,12 @@
                 </select>
             </div>
             
-            <div class="formatting-group">
-                <input type="color" class="color-picker" id="textColor" onchange="changeColor('foreColor', this.value)">
-                <input type="color" class="color-picker" id="highlightColor" onchange="changeColor('hiliteColor', this.value)">
-            </div>
+<div class="formatting-group">
+    <button class="toolbar-btn" onclick="document.getElementById('textColor').click()">Color</button>
+    <button class="toolbar-btn" onclick="document.getElementById('highlightColor').click()">Highlight</button>
+    <input type="color" class="color-picker" id="textColor" onchange="changeColor('foreColor', this.value)" style="display: none;">
+    <input type="color" class="color-picker" id="highlightColor" onchange="changeColor('hiliteColor', this.value)" style="display: none;">
+</div>
 
             <div class="formatting-group">
                 <button class="toolbar-btn" onclick="alignText('left')">🡠</button>
