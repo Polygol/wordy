@@ -6,6 +6,7 @@
     <title>Wordy</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -32,6 +33,7 @@
 
         .toolbar {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
             padding: 15px 20px;
@@ -40,6 +42,61 @@
             border-radius: 25px;
         }
 
+        .formatting-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .toolbar select {
+            background-color: #666666;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .toolbar select:hover {
+            background-color: #bdd6ff;
+            color: #1c1c1c;
+        }
+
+        .color-picker {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+        }
+
+        .preview-mode {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 25px;
+        }
+
+        .preview-mode h1, .preview-mode h2, .preview-mode h3 {
+            color: #ffffff;
+            margin: 1em 0;
+        }
+
+        .preview-mode code {
+            background-color: #3a3a3a;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .preview-mode pre {
+            background-color: #3a3a3a;
+            padding: 1em;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
         .toolbar-btn {
             background-color: #666666;
             color: white;
@@ -87,14 +144,48 @@
 <body>
     <div class="editor-container">
         <div class="toolbar">
-            <button class="toolbar-btn" onclick="formatText('bold')">B</button>
-            <button class="toolbar-btn" onclick="formatText('italic')">I</button>
-            <button class="toolbar-btn" onclick="formatText('underline')">U</button>
-            <button class="toolbar-btn" onclick="alignText('left')">←</button>
-            <button class="toolbar-btn" onclick="alignText('center')">⚌</button>
-            <button class="toolbar-btn" onclick="alignText('right')">→</button>
-            <button class="toolbar-btn" onclick="saveDocument()">Save</button>
+            <div class="formatting-group">
+                <button class="toolbar-btn" onclick="formatText('bold')">𝗕</button>
+                <button class="toolbar-btn" onclick="formatText('italic')">𝘪</button>
+                <button class="toolbar-btn" onclick="formatText('underline')">Ḻ</button>
+                <button class="toolbar-btn" onclick="formatText('strikethrough')">ᵺ</button>
+            </div>
+
+            <div class="formatting-group">
+                <select id="fontFamily" onchange="changeFont()">
+                    <option value="Inter">I</option>
+                    <option value="Roboto">R</option>
+                    <option value="Open Sans">O</option>
+                    <option value="Lato">L</option>
+                    <option value="Montserrat">M</option>
+                </select>
+                
+                <select id="fontSize" onchange="changeFontSize()">
+                    <option value="1">S</option>
+                    <option value="2">M</option>
+                    <option value="3">L</option>
+                    <option value="4">1</option>
+                    <option value="5">2</option>
+                </select>
+            </div>
+            
+            <div class="formatting-group">
+                <input type="color" class="color-picker" id="textColor" onchange="changeColor('foreColor', this.value)">
+                <input type="color" class="color-picker" id="highlightColor" onchange="changeColor('hiliteColor', this.value)">
+            </div>
+
+            <div class="formatting-group">
+                <button class="toolbar-btn" onclick="alignText('left')">🡠</button>
+                <button class="toolbar-btn" onclick="alignText('center')">⚌</button>
+                <button class="toolbar-btn" onclick="alignText('right')">🡢</button>
+            </div>
+
+            <div class="formatting-group">
+                <button class="toolbar-btn" onclick="toggleMarkdownPreview()">👓</button>
+                <button class="toolbar-btn" onclick="saveDocument()">💾</button>
+            </div>
         </div>
+                            
         <div class="editor" contenteditable="true" id="editor"></div>
         <div class="status-bar">
             <span id="wordCount">Words: 0</span>
@@ -112,6 +203,38 @@
             editor.focus();
         }
 
+        function changeFont() {
+            const font = document.getElementById('fontFamily').value;
+            document.execCommand('fontName', false, font);
+            editor.focus();
+        }
+
+        function changeFontSize() {
+            const size = document.getElementById('fontSize').value;
+            document.execCommand('fontSize', false, size);
+            editor.focus();
+        }
+
+        function changeColor(command, value) {
+            document.execCommand(command, false, value);
+            editor.focus();
+        }
+
+        function toggleMarkdownPreview() {
+            if (!isPreviewMode) {
+                const markdown = editor.innerText;
+                const html = marked.parse(markdown);
+                editor.innerHTML = html;
+                editor.classList.add('preview-mode');
+                editor.contentEditable = false;
+            } else {
+                editor.innerHTML = editor.innerText;
+                editor.classList.remove('preview-mode');
+                editor.contentEditable = true;
+            }
+            isPreviewMode = !isPreviewMode;
+        }
+        
         function alignText(alignment) {
             document.execCommand('justify' + alignment.charAt(0).toUpperCase() + alignment.slice(1), false, null);
             editor.focus();
@@ -121,6 +244,8 @@
             const text = editor.innerText || '';
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
             const chars = text.length;
+
+            let isPreviewMode = false;
 
             wordCountElement.textContent = `Words: ${words}`;
             charCountElement.textContent = `Characters: ${chars}`;
