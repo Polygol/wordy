@@ -249,9 +249,9 @@ body {
     
     <!-- Links and Media -->
     <button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')"><span class="material-symbols-rounded">link</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('![', '](url)')"><span class="material-symbols-rounded">image</span></button>
-    <input type="file" id="imageInput" class="file-input" accept="image/*">
-    <label for="imageInput" class="toolbar-btn"><span class="material-symbols-rounded">upload</span></label>
+<button id="imageButton" class="toolbar-btn" onclick="insertMarkdown('![', '](url)')">
+    <span class="material-symbols-rounded">image</span>
+</button>
     
     <!-- Quotes and Dividers -->
     <button class="toolbar-btn" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
@@ -510,8 +510,7 @@ window.addEventListener('load', function() {
 document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
 // Update the image button to trigger file input
-document.querySelector('.toolbar-btn span.material-symbols-rounded:not(.hidden)')
-    .closest('.toolbar-btn[onclick*="!["]')
+document.getElementById('imageButton')
     .setAttribute('onclick', 'document.getElementById("imageInput").click()');
         
         // Initial preview
