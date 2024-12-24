@@ -184,6 +184,18 @@
     <button class="toolbar-btn" onclick="resetFormatting()">Reset</button>
 </div>
 
+    <div class="formatting-group">
+        <button class="toolbar-btn" onclick="addMarkdown('heading1')"># H1</button>
+        <button class="toolbar-btn" onclick="addMarkdown('heading2')">## H2</button>
+        <button class="toolbar-btn" onclick="addMarkdown('heading3')">### H3</button>
+    </div>
+
+    <div class="formatting-group">
+        <button class="toolbar-btn" onclick="addMarkdown('list')">• List</button>
+        <button class="toolbar-btn" onclick="addMarkdown('code')">Code</button>
+        <button class="toolbar-btn" onclick="addMarkdown('quote')">Quote</button>
+    </div>
+            
             <div class="formatting-group">
                 <select id="fontFamily" onchange="changeFont()">
                     <option value="Inter">Inter</option>
@@ -215,13 +227,13 @@
                 <button class="toolbar-btn" onclick="alignText('right')">🡢</button>
             </div>
 
-            <div class="formatting-group">
-                <input type="file" id="fileInput" class="file-input" accept=".html">
-                <label for="fileInput" class="open-file-label">Open</label>
-                <button class="toolbar-btn" onclick="toggleMarkdownPreview()">View</button>
-                <button class="toolbar-btn" onclick="saveDocument()">Save</button>
-            </div>
-        </div>
+    <div class="formatting-group">
+        <button class="toolbar-btn" onclick="resetFormatting()">Reset</button>
+        <button class="toolbar-btn" onclick="saveDocument()">Save</button>
+        <input type="file" id="fileInput" class="file-input" accept=".html">
+        <label for="fileInput" class="toolbar-btn">Open</label>
+    </div>
+</div>
                             
         <div class="editor" contenteditable="true" id="editor"></div>
         <div class="status-bar">
@@ -240,6 +252,39 @@
         editor.style.fontSize = '1rem';
     }
 
+function addMarkdown(type) {
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const selectedText = selection.toString();
+    let markdown = '';
+
+    switch(type) {
+        case 'heading1':
+            markdown = `# ${selectedText || 'Heading 1'}\n`;
+            break;
+        case 'heading2':
+            markdown = `## ${selectedText || 'Heading 2'}\n`;
+            break;
+        case 'heading3':
+            markdown = `### ${selectedText || 'Heading 3'}\n`;
+            break;
+        case 'list':
+            markdown = selectedText ? selectedText.split('\n').map(line => `* ${line}`).join('\n') : '* List item\n';
+            break;
+        case 'code':
+            markdown = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`` : '```\ncode block\n```';
+            break;
+        case 'quote':
+            markdown = selectedText ? selectedText.split('\n').map(line => `> ${line}`).join('\n') : '> Quote\n';
+            break;
+    }
+
+    const textNode = document.createTextNode(markdown);
+    range.deleteContents();
+    range.insertNode(textNode);
+    editor.normalize();
+}
+        
     function updateButtonStates() {
         document.getElementById('boldBtn').classList.toggle('active', document.queryCommandState('bold'));
         document.getElementById('italicBtn').classList.toggle('active', document.queryCommandState('italic'));
@@ -299,25 +344,6 @@
             reader.readAsText(file);
         }
     });
-
-    function toggleMarkdownPreview() {
-        if (!isPreviewMode) {
-            const markdown = editor.innerText;
-            const html = marked.parse(markdown);
-            const previewDiv = document.createElement('div');
-            previewDiv.innerHTML = html;
-            previewDiv.className = 'preview-mode';
-            editor.parentNode.insertBefore(previewDiv, editor);
-            editor.style.display = 'none';
-        } else {
-            const previewDiv = document.querySelector('.preview-mode');
-            if (previewDiv) {
-                previewDiv.remove();
-            }
-            editor.style.display = 'block';
-        }
-        isPreviewMode = !isPreviewMode;
-    }
         
         function alignText(alignment) {
             document.execCommand('justify' + alignment.charAt(0).toUpperCase() + alignment.slice(1), false, null);
@@ -335,16 +361,24 @@
             charCountElement.textContent = `Characters: ${chars}`;
         }
 
-        function saveDocument() {
-            const content = editor.innerHTML;
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'document.html';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+function saveDocument() {
+    // Get current date in YYYY-MM-DD format
+    const timestamp = new Date().toISOString().slice(0,10);
+    
+    // Prompt for filename with default name
+    const filename = prompt('Enter filename:', `document-${timestamp}.html`);
+    if (!filename) return;  // User cancelled
+
+    // Save the HTML content
+    const content = editor.innerHTML;
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
     window.onload = function() {
         document.getElementById('fontFamily').value = 'Inter';
@@ -354,6 +388,13 @@
 
     editor.addEventListener('mouseup', updateButtonStates);
     editor.addEventListener('keyup', updateButtonStates);
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveDocument();
+    }
+});
         
     window.addEventListener('load', function() {
         if (localStorage.getItem('editorContent')) {
