@@ -247,11 +247,14 @@ body {
     <button class="toolbar-btn" onclick="insertMarkdown('`', '`')"><span class="material-symbols-rounded">code</span></button>
     <button class="toolbar-btn" onclick="insertMarkdown('```\n', '\n```')"><span class="material-symbols-rounded">data_object</span></button>
     
-    <!-- Links and Media -->
-    <button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')"><span class="material-symbols-rounded">link</span></button>
-<button id="imageButton" class="toolbar-btn" onclick="insertMarkdown('![', '](url)')">
+<!-- Links and Media -->
+<button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')">
+    <span class="material-symbols-rounded">link</span>
+</button>
+<button id="imageButton" class="toolbar-btn">
     <span class="material-symbols-rounded">image</span>
 </button>
+<input type="file" id="imageInput" class="file-input" accept="image/*">
     
     <!-- Quotes and Dividers -->
     <button class="toolbar-btn" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
@@ -566,8 +569,18 @@ window.addEventListener('load', function() {
         // Live preview update
         editor.addEventListener('input', updatePreview);
 
-document.getElementById('imageInput').addEventListener('change', handleImageUpload);
-
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('imageInput');
+    const imageButton = document.getElementById('imageButton');
+    
+    if (imageInput && imageButton) {
+        imageInput.addEventListener('change', handleImageUpload);
+        imageButton.addEventListener('click', function() {
+            imageInput.click();
+        });
+    }
+});
+        
 document.getElementById('undoButton').addEventListener('click', undo);
 document.getElementById('redoButton').addEventListener('click', redo);
 
