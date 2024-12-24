@@ -307,12 +307,19 @@ function setToolbarState(disabled) {
             gfm: true
         });
 
-        function updatePreview() {
-            const markdown = editor.value;
-            preview.innerHTML = marked.parse(markdown);
-            updateCounts();
-            autosave();
-        }
+function updatePreview() {
+    let markdown = editor.value;
+    
+    // Replace all image IDs with their base64 data
+    markdown = markdown.replace(/\(#(img_\d+)\)/g, (match, imageId) => {
+        const base64Data = localStorage.getItem(imageId);
+        return `(${base64Data || match})`;
+    });
+    
+    preview.innerHTML = marked.parse(markdown);
+    updateCounts();
+    autosave();
+}
 
 function insertTable() {
     const tableTemplate = `
@@ -360,24 +367,39 @@ function insertTable() {
             charCountElement.textContent = `Characters: ${chars}`;
         }
 
-        function saveDocument() {
-            const timestamp = new Date().toISOString().slice(0,10);
-            const filename = prompt('Enter filename:', `document-${timestamp}.md`);
-            if (!filename) return;
+function saveDocument() {
+    const timestamp = new Date().toISOString().slice(0,10);
+    const filename = prompt('Enter filename:', `document-${timestamp}.md`);
+    if (!filename) return;
 
-            const content = editor.value;
-            const blob = new Blob([content], { type: 'text/markdown' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+    // Replace image IDs with their base64 data for saving
+    let content = editor.value;
+    content = content.replace(/\(#(img_\d+)\)/g, (match, imageId) => {
+        const base64Data = localStorage.getItem(imageId);
+        return `(${base64Data || match})`;
+    });
+
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 function autosave() {
-    if (!isPreviewMode) {  // Only autosave when in edit mode
+    if (!isPreviewMode) {
+        // Save the markdown content
         localStorage.setItem('markdownContent', editor.value);
+        
+        // Save the full version with base64 data for backup
+        let fullContent = editor.value;
+        fullContent = fullContent.replace(/\(#(img_\d+)\)/g, (match, imageId) => {
+            const base64Data = localStorage.getItem(imageId);
+            return `(${base64Data || match})`;
+        });
+        localStorage.setItem('markdownContentFull', fullContent);
         localStorage.setItem('lastSaved', new Date().toISOString());
     }
 }
@@ -396,17 +418,23 @@ function handleImageUpload(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const base64String = e.target.result;
-            const imageMarkdown = `![${file.name}](${base64String})`;
+            // Create a data attribute friendly ID
+            const imageId = `img_${Date.now()}`;
+            // Store the base64 data
+            localStorage.setItem(imageId, base64String);
             
-            // Insert at cursor position
+            // Insert simplified markdown with custom identifier
+            const displayMarkdown = `![${file.name}](#${imageId})`;
+            
             const cursorPos = editor.selectionStart;
             const textBefore = editor.value.substring(0, cursorPos);
             const textAfter = editor.value.substring(cursorPos);
             
-            editor.value = textBefore + imageMarkdown + textAfter;
+            editor.value = textBefore + displayMarkdown + textAfter;
+            
+            // Modify the preview renderer to use the stored base64 data
             updatePreview();
             
-            // Reset the input
             event.target.value = '';
         };
         reader.readAsDataURL(file);
@@ -458,12 +486,23 @@ previewToggle.addEventListener('click', function() {
         });
 
         // Load autosaved content
-        window.addEventListener('load', function() {
-            if (localStorage.getItem('markdownContent')) {
-                editor.value = localStorage.getItem('markdownContent');
-                updatePreview();
-            }
+window.addEventListener('load', function() {
+    const savedContent = localStorage.getItem('markdownContentFull');
+    if (savedContent) {
+        // Extract and store any base64 images
+        savedContent.replace(/!\[([^\]]+)\]\((data:image[^)]+)\)/g, (match, filename, base64Data) => {
+            const imageId = `img_${Date.now()}`;
+            localStorage.setItem(imageId, base64Data);
+            return `![${filename}](#${imageId})`;
         });
+        
+        editor.value = savedContent.replace(/!\[([^\]]+)\]\((data:image[^)]+)\)/g, (match, filename, base64Data) => {
+            const imageId = `img_${Date.now()}`;
+            return `![${filename}](#${imageId})`;
+        });
+        updatePreview();
+    }
+});
 
         // Live preview update
         editor.addEventListener('input', updatePreview);
