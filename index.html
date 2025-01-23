@@ -220,6 +220,38 @@ body {
 .font-opensans { font-family: 'Open Sans', sans-serif; }
 .font-notoserif { font-family: 'Noto Serif', serif; }
 .font-robotomono { font-family: 'Roboto Mono', monospace; }
+
+@media print {
+    .toolbar, .status-bar {
+        display: none !important;
+    }
+
+    .editor-preview-container {
+        min-height: auto !important;
+    }
+
+    #editor {
+        display: none !important;
+    }
+
+    #preview {
+        display: block !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background-color: white !important;
+    }
+
+    .preview {
+        color: black !important;
+    }
+
+    .preview h1, .preview h2, .preview h3 {
+        color: black !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -597,6 +629,13 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
         redo();
     }
+});
+
+window.addEventListener('beforeprint', function() {
+    if (!isPreviewMode) {
+        previewToggle.click(); // Switch to preview mode if not already in preview
+    }
+    updatePreview(); // Ensure the preview is up to date
 });
         
 // Update the image button to trigger file input
