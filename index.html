@@ -13,6 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
+            --edge-refraction-filter: url('#edge-refraction-only');
+            
             /* Dark Theme (Default) Variables */
             --background-color-dark: #1c1c1c;
             --text-color-dark: #f9f9f9;
@@ -138,7 +140,7 @@
             cursor: pointer;
             font-size: 0.9rem;
             transition: background-color 0.2s;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px) var(--edge-refraction-filter);
         }
         
         toolbar-btn.active {
@@ -372,65 +374,91 @@
     </style>
 </head>
 <body>
+    <svg style="display: none">
+        <filter id="edge-refraction-only" color-interpolation-filters="linearRGB">
+            <!-- Part 1: Create the turbulence that will only be used at the edges -->
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" result="turbulence"/>
+        
+            <!-- Part 2: Create a mask that is only opaque at the edges -->
+            <feMorphology in="SourceGraphic" operator="erode" radius="4" result="eroded"/>
+            <feComposite in="SourceGraphic" in2="eroded" operator="out" result="border_mask"/>
+            <feComposite in="turbulence" in2="border_mask" operator="in" result="edge_turbulence"/>
+        
+            <!-- Part 3: Create the final displacement map -->
+            <!-- First, create the 50% gray neutral background -->
+            <feFlood flood-color="#808080" result="neutral_base"/>
+            
+            <!-- Next, use feMerge to explicitly stack the edge turbulence ON TOP of the gray base.
+                 This is the key step that prevents the center from shifting. -->
+            <feMerge result="displacement_map">
+                <feMergeNode in="neutral_base"/>
+                <feMergeNode in="edge_turbulence"/>
+            </feMerge>
+        
+            <!-- Part 4: Apply the final, perfectly centered displacement map -->
+            <feDisplacementMap in="SourceGraphic" in2="displacement_map" scale="40" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </svg>
+    
     <div class="editor-container">
-<div class="toolbar">
-    <!-- Preview toggle -->
-    <button class="toolbar-btn" id="previewToggle"><span class="material-symbols-rounded">preview</span></button>
-    
-    <!-- Headers -->
-    <button class="toolbar-btn" onclick="insertMarkdown('# ')"><span class="material-symbols-rounded">looks_one</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('## ')"><span class="material-symbols-rounded">looks_two</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('### ')"><span class="material-symbols-rounded">looks_3</span></button>
-    
-    <!-- Text formatting -->
-    <button class="toolbar-btn" onclick="insertMarkdown('**', '**')"><span class="material-symbols-rounded">format_bold</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('*', '*')"><span class="material-symbols-rounded">format_italic</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('~~', '~~')"><span class="material-symbols-rounded">strikethrough_s</span></button>
-    
-    <!-- Lists -->
-    <button class="toolbar-btn" onclick="insertMarkdown('- ')"><span class="material-symbols-rounded">list</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('1. ')"><span class="material-symbols-rounded">format_list_numbered</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('- [ ] ')"><span class="material-symbols-rounded">check_box_outline_blank</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('- [x] ')"><span class="material-symbols-rounded">check_box</span></button>
-    
-    <!-- Code -->
-    <button class="toolbar-btn" onclick="insertMarkdown('`', '`')"><span class="material-symbols-rounded">code</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('```\n', '\n```')"><span class="material-symbols-rounded">data_object</span></button>
-    
-<!-- Links and Media -->
-<button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')">
-    <span class="material-symbols-rounded">link</span>
-</button>
-<button id="imageButton" class="toolbar-btn">
-    <span class="material-symbols-rounded">image</span>
-</button>
-<input type="file" id="imageInput" class="file-input" accept="image/*">
-    
-    <!-- Quotes and Dividers -->
-    <button class="toolbar-btn" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
-    <button class="toolbar-btn" onclick="insertMarkdown('\n---\n')"><span class="material-symbols-rounded">horizontal_rule</span></button>
-    
-    <!-- Tables -->
-    <button class="toolbar-btn" onclick="insertTable()"><span class="material-symbols-rounded">table</span></button>
-    
-    <!-- File Operations and Undo Redo -->
-    <button class="toolbar-btn" id="undoButton" disabled><span class="material-symbols-rounded">undo</span></button>
-    <button class="toolbar-btn" id="redoButton" disabled><span class="material-symbols-rounded">redo</span></button>
-    <button class="toolbar-btn" onclick="saveDocument()"><span class="material-symbols-rounded">save</span></button>
-    <input type="file" id="fileInput" class="file-input" accept=".md,.txt">
-    <label for="fileInput" class="toolbar-btn"><span class="material-symbols-rounded">folder_open</span></label>
-</div>
-
-<div class="editor-container">
-    <div class="editor-preview-container">
-        <textarea id="editor" class="editor" spellcheck="true"></textarea>
-        <div id="preview" class="preview hidden"></div>
-    </div>
-    <div class="status-bar">
-        <span id="wordCount">Words: 0</span>
-        <span id="charCount">Characters: 0</span>
-    </div>
-</div>
+        <div class="toolbar">
+            <!-- Preview toggle -->
+            <button class="toolbar-btn" id="previewToggle"><span class="material-symbols-rounded">preview</span></button>
+            
+            <!-- Headers -->
+            <button class="toolbar-btn" onclick="insertMarkdown('# ')"><span class="material-symbols-rounded">looks_one</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('## ')"><span class="material-symbols-rounded">looks_two</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('### ')"><span class="material-symbols-rounded">looks_3</span></button>
+            
+            <!-- Text formatting -->
+            <button class="toolbar-btn" onclick="insertMarkdown('**', '**')"><span class="material-symbols-rounded">format_bold</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('*', '*')"><span class="material-symbols-rounded">format_italic</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('~~', '~~')"><span class="material-symbols-rounded">strikethrough_s</span></button>
+            
+            <!-- Lists -->
+            <button class="toolbar-btn" onclick="insertMarkdown('- ')"><span class="material-symbols-rounded">list</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('1. ')"><span class="material-symbols-rounded">format_list_numbered</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('- [ ] ')"><span class="material-symbols-rounded">check_box_outline_blank</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('- [x] ')"><span class="material-symbols-rounded">check_box</span></button>
+            
+            <!-- Code -->
+            <button class="toolbar-btn" onclick="insertMarkdown('`', '`')"><span class="material-symbols-rounded">code</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('```\n', '\n```')"><span class="material-symbols-rounded">data_object</span></button>
+            
+        <!-- Links and Media -->
+        <button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')">
+            <span class="material-symbols-rounded">link</span>
+        </button>
+        <button id="imageButton" class="toolbar-btn">
+            <span class="material-symbols-rounded">image</span>
+        </button>
+        <input type="file" id="imageInput" class="file-input" accept="image/*">
+            
+            <!-- Quotes and Dividers -->
+            <button class="toolbar-btn" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
+            <button class="toolbar-btn" onclick="insertMarkdown('\n---\n')"><span class="material-symbols-rounded">horizontal_rule</span></button>
+            
+            <!-- Tables -->
+            <button class="toolbar-btn" onclick="insertTable()"><span class="material-symbols-rounded">table</span></button>
+            
+            <!-- File Operations and Undo Redo -->
+            <button class="toolbar-btn" id="undoButton" disabled><span class="material-symbols-rounded">undo</span></button>
+            <button class="toolbar-btn" id="redoButton" disabled><span class="material-symbols-rounded">redo</span></button>
+            <button class="toolbar-btn" onclick="saveDocument()"><span class="material-symbols-rounded">save</span></button>
+            <input type="file" id="fileInput" class="file-input" accept=".md,.txt">
+            <label for="fileInput" class="toolbar-btn"><span class="material-symbols-rounded">folder_open</span></label>
+        </div>
+        
+        <div class="editor-container">
+            <div class="editor-preview-container">
+                <textarea id="editor" class="editor" spellcheck="true"></textarea>
+                <div id="preview" class="preview hidden"></div>
+            </div>
+            <div class="status-bar">
+                <span id="wordCount">Words: 0</span>
+                <span id="charCount">Characters: 0</span>
+            </div>
+        </div>
 
     <script>
         const editor = document.getElementById('editor');
