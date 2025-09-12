@@ -103,7 +103,6 @@
         
         .editor-container {
             width: 100%;
-            max-width: 800px;
         }
         
         .toolbar {
@@ -115,6 +114,9 @@
             background-color: var(--overlay-color);
             border-radius: 25px;
             border: 1px solid var(--glass-border);
+            justify-content: space-between;
+            backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
         }
         
         .formatting-group {
@@ -134,21 +136,19 @@
         }
         
         .toolbar-btn {
-            background-color: var(--search-background);
+            background-color: transparent;
             color: var(--text-color);
-            border: 1px solid var(--glass-border);
+            border: none;
             align-items: center;
             justify-content: center;
             border-radius: 25px;
-            padding: 8px 15px;
+            padding: 10px;
             cursor: pointer;
             font-size: 0.9rem;
             transition: background-color 0.2s;
-            backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
-            box-shadow: var(--sun-shadow);
         }
         
-        toolbar-btn.active {
+        .toolbar-btn.active {
             background-color: var(--text-color);
             color: var(--background-color);
         }
@@ -270,13 +270,6 @@
         
         .hidden {
             display: none !important;
-        }
-        
-        .toolbar-btn:nth-child(2),
-        .toolbar-btn:nth-child(3),
-        .toolbar-btn:nth-child(4) {
-            width: auto;
-            padding: 8px 15px;
         }
             
         .font-inter { font-family: 'Inter', sans-serif; }
@@ -413,8 +406,7 @@
             <feBlend in="disp_positive" in2="disp_negative" mode="lighten"></feBlend>
         </filter>
     </svg>
-    
-    <div class="editor-container">
+
         <div class="toolbar">
             <!-- Preview toggle -->
             <button class="toolbar-btn" id="previewToggle"><span class="material-symbols-rounded">preview</span></button>
@@ -462,7 +454,8 @@
             <input type="file" id="fileInput" class="file-input" accept=".md,.txt">
             <label for="fileInput" class="toolbar-btn"><span class="material-symbols-rounded">folder_open</span></label>
         </div>
-        
+    
+    <div class="editor-container">
         <div class="editor-container">
             <div class="editor-preview-container">
                 <textarea id="editor" class="editor" spellcheck="true"></textarea>
