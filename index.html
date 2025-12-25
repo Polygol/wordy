@@ -103,7 +103,7 @@
             width: 100%;
         }
         
-        .toolbar {
+        .actionbar {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
@@ -124,7 +124,7 @@
             align-items: center;
         }
         
-        .toolbar select {
+        .actionbar select {
             background-color: var(--search-background);
             color: var(--text-color);
             border: none;
@@ -134,7 +134,7 @@
             font-size: 0.9rem;
         }
         
-        .toolbar-btn {
+        .actionbar-btn {
             background-color: transparent;
             color: var(--text-color);
             border: none;
@@ -147,7 +147,7 @@
             transition: background-color 0.2s;
         }
         
-        .toolbar-btn.active {
+        .actionbar-btn.active {
             background-color: var(--text-color);
             color: var(--background-color);
         }
@@ -278,7 +278,7 @@
         .font-robotomono { font-family: 'Roboto Mono', monospace; }
             
         @media print {
-            .toolbar, .status-bar {
+            .actionbar, .status-bar {
                 display: none !important;
             }
         
@@ -408,52 +408,50 @@
         </filter>
     </svg>
 
-    <div class="toolbar">
+    <div class="actionbar">
         <!-- Preview toggle -->
-        <button class="toolbar-btn" id="previewToggle"><span class="material-symbols-rounded">preview</span></button>
+        <button class="actionbar-btn" id="previewToggle"><span class="material-symbols-rounded">preview</span></button>
         
         <!-- Headers -->
-        <button class="toolbar-btn" onclick="insertMarkdown('# ')"><span class="material-symbols-rounded">looks_one</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('## ')"><span class="material-symbols-rounded">looks_two</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('### ')"><span class="material-symbols-rounded">looks_3</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('# ')"><span class="material-symbols-rounded">looks_one</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('## ')"><span class="material-symbols-rounded">looks_two</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('### ')"><span class="material-symbols-rounded">looks_3</span></button>
         
         <!-- Text formatting -->
-        <button class="toolbar-btn" onclick="insertMarkdown('**', '**')"><span class="material-symbols-rounded">format_bold</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('*', '*')"><span class="material-symbols-rounded">format_italic</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('~~', '~~')"><span class="material-symbols-rounded">strikethrough_s</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('**', '**')"><span class="material-symbols-rounded">format_bold</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('*', '*')"><span class="material-symbols-rounded">format_italic</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('~~', '~~')"><span class="material-symbols-rounded">strikethrough_s</span></button>
         
         <!-- Lists -->
-        <button class="toolbar-btn" onclick="insertMarkdown('- ')"><span class="material-symbols-rounded">list</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('1. ')"><span class="material-symbols-rounded">format_list_numbered</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('- [ ] ')"><span class="material-symbols-rounded">check_box_outline_blank</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('- [x] ')"><span class="material-symbols-rounded">check_box</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('- ')"><span class="material-symbols-rounded">list</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('1. ')"><span class="material-symbols-rounded">format_list_numbered</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('- [ ] ')"><span class="material-symbols-rounded">check_box_outline_blank</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('- [x] ')"><span class="material-symbols-rounded">check_box</span></button>
         
         <!-- Code -->
-        <button class="toolbar-btn" onclick="insertMarkdown('`', '`')"><span class="material-symbols-rounded">code</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('```\n', '\n```')"><span class="material-symbols-rounded">data_object</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('`', '`')"><span class="material-symbols-rounded">code</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('```\n', '\n```')"><span class="material-symbols-rounded">data_object</span></button>
         
     <!-- Links and Media -->
-    <button class="toolbar-btn" onclick="insertMarkdown('[', '](url)')">
+    <button class="actionbar-btn" onclick="insertMarkdown('[', '](url)')">
         <span class="material-symbols-rounded">link</span>
     </button>
-    <button id="imageButton" class="toolbar-btn">
+    <button id="imageButton" class="actionbar-btn">
         <span class="material-symbols-rounded">image</span>
     </button>
-    <input type="file" id="imageInput" class="file-input" accept="image/*">
         
         <!-- Quotes and Dividers -->
-        <button class="toolbar-btn" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
-        <button class="toolbar-btn" onclick="insertMarkdown('\n---\n')"><span class="material-symbols-rounded">horizontal_rule</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
+        <button class="actionbar-btn" onclick="insertMarkdown('\n---\n')"><span class="material-symbols-rounded">horizontal_rule</span></button>
         
         <!-- Tables -->
-        <button class="toolbar-btn" onclick="insertTable()"><span class="material-symbols-rounded">table</span></button>
+        <button class="actionbar-btn" onclick="insertTable()"><span class="material-symbols-rounded">table</span></button>
         
         <!-- File Operations and Undo Redo -->
-        <button class="toolbar-btn" id="undoButton" disabled><span class="material-symbols-rounded">undo</span></button>
-        <button class="toolbar-btn" id="redoButton" disabled><span class="material-symbols-rounded">redo</span></button>
-        <button class="toolbar-btn" onclick="saveDocument()"><span class="material-symbols-rounded">save</span></button>
-        <input type="file" id="fileInput" class="file-input" accept=".md,.txt">
-        <label for="fileInput" class="toolbar-btn"><span class="material-symbols-rounded">folder_open</span></label>
+        <button class="actionbar-btn" id="undoButton" disabled><span class="material-symbols-rounded">undo</span></button>
+        <button class="actionbar-btn" id="redoButton" disabled><span class="material-symbols-rounded">redo</span></button>
+        <button class="actionbar-btn" onclick="saveDocument()"><span class="material-symbols-rounded">save</span></button>
+        <button id="openFileBtn" class="actionbar-btn"><span class="material-symbols-rounded">folder_open</span></button>
     </div>
     
     <div class="editor-container">
@@ -476,9 +474,9 @@
 
         let isPreviewMode = false;
 
-// Function to disable/enable toolbar buttons
-function setToolbarState(disabled) {
-    const buttons = document.querySelectorAll('.toolbar-btn:not(#previewToggle)');
+// Function to disable/enable actionbar buttons
+function setactionbarState(disabled) {
+    const buttons = document.querySelectorAll('.actionbar-btn:not(#previewToggle)');
     buttons.forEach(button => {
         button.disabled = disabled;
         if (disabled) {
@@ -658,35 +656,6 @@ editor.addEventListener('input', function() {
     saveTimeout = setTimeout(autosave, 1000);
 });
         
-function handleImageUpload(event) {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const base64String = e.target.result;
-            // Create a data attribute friendly ID
-            const imageId = `img_${Date.now()}`;
-            // Store the base64 data
-            localStorage.setItem(imageId, base64String);
-            
-            // Insert simplified markdown with custom identifier
-            const displayMarkdown = `![${file.name}](#${imageId})`;
-            
-            const cursorPos = editor.selectionStart;
-            const textBefore = editor.value.substring(0, cursorPos);
-            const textAfter = editor.value.substring(cursorPos);
-            
-            editor.value = textBefore + displayMarkdown + textAfter;
-            
-            // Modify the preview renderer to use the stored base64 data
-            updatePreview();
-            
-            event.target.value = '';
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
 previewToggle.addEventListener('click', function() {
     isPreviewMode = !isPreviewMode;
     previewToggle.classList.toggle('active');
@@ -698,30 +667,17 @@ previewToggle.addEventListener('click', function() {
         preview.classList.remove('hidden');
         toggleIcon.textContent = 'edit';
         editor.readOnly = true;  // Disable typing in editor
-        setToolbarState(true);   // Disable toolbar buttons
+        setactionbarState(true);   // Disable actionbar buttons
     } else {
         editor.classList.remove('hidden');
         preview.classList.add('hidden');
         toggleIcon.textContent = 'preview';
         editor.readOnly = false;  // Enable typing in editor
-        setToolbarState(false);   // Enable toolbar buttons
+        setactionbarState(false);   // Enable actionbar buttons
     }
     
     updatePreview();
 });
-        
-        // File opening
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    editor.value = e.target.result;
-                    updatePreview();
-                };
-                reader.readAsText(file);
-            }
-        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
@@ -754,16 +710,54 @@ window.addEventListener('load', function() {
         // Live preview update
         editor.addEventListener('input', updatePreview);
 
-document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.getElementById('imageInput');
-    const imageButton = document.getElementById('imageButton');
-    
-    if (imageInput && imageButton) {
-        imageInput.addEventListener('change', handleImageUpload);
-        imageButton.addEventListener('click', function() {
-            imageInput.click();
-        });
-    }
+document.addEventListener('DOMContentLoaded', function() {    
+    document.getElementById('imageButton').addEventListener('click', async () => {
+        try {
+            const files = await Gurasuraisu.requestFile({ accept: 'image/*', multiple: false });
+            if (files && files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64String = e.target.result;
+                    const imageId = `img_${Date.now()}`;
+                    localStorage.setItem(imageId, base64String);
+                    
+                    const displayMarkdown = `![${file.name}](#${imageId})`;
+                    
+                    const cursorPos = editor.selectionStart;
+                    const textBefore = editor.value.substring(0, cursorPos);
+                    const textAfter = editor.value.substring(cursorPos);
+                    
+                    editor.value = textBefore + displayMarkdown + textAfter;
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        } catch (e) {
+            console.error("Image upload failed", e);
+        }
+    });
+
+    document.getElementById('openFileBtn').addEventListener('click', async () => {
+        try {
+            const files = await Gurasuraisu.requestFile({ accept: '.md,.txt', multiple: false });
+            if (files && files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    editor.value = e.target.result;
+                    updatePreview();
+                    // Reset history on new file load
+                    history = [];
+                    currentHistoryIndex = -1;
+                    saveToHistory(editor.value);
+                };
+                reader.readAsText(file);
+            }
+        } catch (e) {
+            console.error("File open failed", e);
+        }
+    });
 });
         
 document.getElementById('undoButton').addEventListener('click', undo);
@@ -789,10 +783,6 @@ window.addEventListener('beforeprint', function() {
     }
     updatePreview(); // Ensure the preview is up to date
 });
-        
-// Update the image button to trigger file input
-document.getElementById('imageButton')
-    .setAttribute('onclick', 'document.getElementById("imageInput").click()');
         
         // Initial preview
         updatePreview();
