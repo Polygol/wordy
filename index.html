@@ -309,65 +309,6 @@
                 color: black !important;
             }
         }
-        
-        /* For all clickable elements */
-        [onclick], 
-        button, 
-        a, 
-        input[type="button"], 
-        input[type="submit"],
-        .clickable {
-          cursor: pointer;
-          transform: scale(1);
-          transition: all 0.15s cubic-bezier(0.2, 0, 0.38, 0.9);
-        }
-        
-        /* Active effect (when clicking down) */
-        [onclick]:active, 
-        button:active, 
-        a:active, 
-        input[type="button"]:active, 
-        input[type="submit"]:active,
-        .clickable:active {
-          transform: scale(0.96);
-          transition: all 0.1s cubic-bezier(0.2, 0, 0.38, 0.9);
-          filter: brightness(1.5);
-        }
-        
-        /* When animations are disabled */
-        .reduce-animations * {
-            /* Disable all animations */
-            animation: none !important;
-        
-            /* Disable all transitions except opacity */
-            transition: opacity 0.3s ease !important;
-            transition-property: opacity !important;
-        }
-        
-        /* Special handling for clickable elements */
-        .reduce-animations [onclick],
-        .reduce-animations button,
-        .reduce-animations a,
-        .reduce-animations input[type="button"],
-        .reduce-animations input[type="submit"],
-        .reduce-animations .clickable {
-            /* Keep initial state but remove transition */
-            transform: scale(1) !important;
-            transition: opacity 0.3s ease !important;
-        }
-        
-        /* Keep active state functional but without animation */
-        .reduce-animations [onclick]:active,
-        .reduce-animations button:active,
-        .reduce-animations a:active,
-        .reduce-animations input[type="button"]:active,
-        .reduce-animations input[type="submit"]:active,
-        .reduce-animations .clickable:active {
-            /* Apply scale instantly without transition */
-            transform: scale(0.98) !important;
-            transition: none !important;
-            filter: brightness(1.5) !important;
-        }
     </style>
 </head>
 <body data-app-name="WORDY">
