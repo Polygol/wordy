@@ -1,4 +1,4 @@
-const LANG_EN_WORDY = {
+window.LANG_EN_WORDY = {
     TITLE: "Wordy",
     PREVIEW: "Preview",
     EDIT: "Edit",
@@ -29,7 +29,7 @@ const LANG_EN_WORDY = {
     DEFAULT_FILENAME: "document-{timestamp}.md"
 };
 
-const LANG_JP_WORDY = {
+window.LANG_JP_WORDY = {
     TITLE: "Wordy",
     PREVIEW: "プレビュー",
     EDIT: "編集",
@@ -60,7 +60,7 @@ const LANG_JP_WORDY = {
     DEFAULT_FILENAME: "ドキュメント-{timestamp}.md"
 };
 
-const LANG_KO_WORDY = {
+window.LANG_KO_WORDY = {
     TITLE: "Wordy",
     PREVIEW: "미리보기",
     EDIT: "편집",
@@ -91,7 +91,7 @@ const LANG_KO_WORDY = {
     DEFAULT_FILENAME: "문서-{timestamp}.md"
 };
 
-const LANG_ZH_WORDY = {
+window.LANG_ZH_WORDY = {
     TITLE: "Wordy",
     PREVIEW: "预览",
     EDIT: "编辑",
@@ -121,3 +121,8 @@ const LANG_ZH_WORDY = {
     SAVE_FILENAME_PROMPT: "输入文件名：",
     DEFAULT_FILENAME: "文档-{timestamp}.md"
 };
+
+var LANG_EN_WORDY = window.LANG_EN_WORDY;
+var LANG_JP_WORDY = window.LANG_JP_WORDY;
+var LANG_KO_WORDY = window.LANG_KO_WORDY;
+var LANG_ZH_WORDY = window.LANG_ZH_WORDY;
