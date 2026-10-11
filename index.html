@@ -3,13 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Wordy</title>
+    <title data-lang-key="TITLE">Wordy</title>
+    <script src="lang.js">
+        function onLanguageChanged() {
+            updateCounts();
+            previewToggle.title = isPreviewMode ? t('EDIT') : t('PREVIEW');
+        }
+
+        // --- Internationalization (i18n) Support ---
+        function getAppLanguage() {
+            let l = (localStorage.getItem('language') || localStorage.getItem('selectedLanguage') || 'EN').toUpperCase();
+            if (l === 'JA') l = 'JP';
+            return ['EN', 'JP', 'KO', 'ZH'].includes(l) ? l : 'EN';
+        }
+
+        function t(key, params = {}) {
+            const lang = getAppLanguage();
+            const dict = window['LANG_' + lang + '_WORDY'] || window['LANG_EN_WORDY'] || {};
+            let str = dict[key] || key;
+            Object.keys(params).forEach(p => {
+                str = str.replace(new RegExp('\\{' + p + '\\}', 'g'), params[p]);
+            });
+            return str;
+        }
+
+        function applyLanguage(langCode) {
+            if (langCode) localStorage.setItem('language', langCode);
+            const lang = getAppLanguage();
+            const bcpMap = { EN: 'en-US', JP: 'ja-JP', KO: 'ko-KR', ZH: 'zh-CN' };
+            document.documentElement.lang = bcpMap[lang] || 'en-US';
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const k = el.getAttribute('data-lang-key');
+                if (k) {
+                    if (el.tagName === 'TITLE') {
+                        document.title = t(k);
+                    } else {
+                        el.textContent = t(k);
+                    }
+                }
+            });
+            document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                const k = el.getAttribute('data-lang-placeholder');
+                if (k) el.placeholder = t(k);
+            });
+            document.querySelectorAll('[data-lang-title]').forEach(el => {
+                const k = el.getAttribute('data-lang-title');
+                if (k) el.title = t(k);
+            });
+            if (typeof onLanguageChanged === 'function') {
+                onLanguageChanged(lang);
+            }
+        }
+
+        window.addEventListener('message', (e) => {
+            if (e.data && (e.data.type === 'languageUpdate' || e.data.type === 'localeUpdate')) {
+                applyLanguage(e.data.languageCode);
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => applyLanguage());
+
+    </script>
     <link rel="icon" href="favicon.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/Polygol/polygol.github.io@main/assets/gurapp/api/gurasuraisu-api.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/Polygol/polygol.github.io@main/assets/polygolapp/api/polygol-api.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
@@ -247,48 +307,48 @@
 <body data-app-name="WORDY">
     <div class="actionbar">
         <!-- Preview toggle -->
-        <button class="actionbar-btn" id="previewToggle"><span class="material-symbols-rounded">preview</span></button>
+        <button class="actionbar-btn" id="previewToggle" data-lang-title="PREVIEW" title="Preview"><span class="material-symbols-rounded">preview</span></button>
         
         <!-- Headers -->
-        <button class="actionbar-btn" onclick="insertMarkdown('# ')"><span class="material-symbols-rounded">looks_one</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('## ')"><span class="material-symbols-rounded">looks_two</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('### ')"><span class="material-symbols-rounded">looks_3</span></button>
+        <button class="actionbar-btn" data-lang-title="HEADER1" title="Header 1" onclick="insertMarkdown('# ')"><span class="material-symbols-rounded">looks_one</span></button>
+        <button class="actionbar-btn" data-lang-title="HEADER2" title="Header 2" onclick="insertMarkdown('## ')"><span class="material-symbols-rounded">looks_two</span></button>
+        <button class="actionbar-btn" data-lang-title="HEADER3" title="Header 3" onclick="insertMarkdown('### ')"><span class="material-symbols-rounded">looks_3</span></button>
         
         <!-- Text formatting -->
-        <button class="actionbar-btn" onclick="insertMarkdown('**', '**')"><span class="material-symbols-rounded">format_bold</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('*', '*')"><span class="material-symbols-rounded">format_italic</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('~~', '~~')"><span class="material-symbols-rounded">strikethrough_s</span></button>
+        <button class="actionbar-btn" data-lang-title="BOLD" title="Bold" onclick="insertMarkdown('**', '**')"><span class="material-symbols-rounded">format_bold</span></button>
+        <button class="actionbar-btn" data-lang-title="ITALIC" title="Italic" onclick="insertMarkdown('*', '*')"><span class="material-symbols-rounded">format_italic</span></button>
+        <button class="actionbar-btn" data-lang-title="STRIKETHROUGH" title="Strikethrough" onclick="insertMarkdown('~~', '~~')"><span class="material-symbols-rounded">strikethrough_s</span></button>
         
         <!-- Lists -->
-        <button class="actionbar-btn" onclick="insertMarkdown('- ')"><span class="material-symbols-rounded">list</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('1. ')"><span class="material-symbols-rounded">format_list_numbered</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('- [ ] ')"><span class="material-symbols-rounded">check_box_outline_blank</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('- [x] ')"><span class="material-symbols-rounded">check_box</span></button>
+        <button class="actionbar-btn" data-lang-title="UNORDERED_LIST" title="List" onclick="insertMarkdown('- ')"><span class="material-symbols-rounded">list</span></button>
+        <button class="actionbar-btn" data-lang-title="ORDERED_LIST" title="Numbered List" onclick="insertMarkdown('1. ')"><span class="material-symbols-rounded">format_list_numbered</span></button>
+        <button class="actionbar-btn" data-lang-title="CHECKBOX_UNCHECKED" title="Task List" onclick="insertMarkdown('- [ ] ')"><span class="material-symbols-rounded">check_box_outline_blank</span></button>
+        <button class="actionbar-btn" data-lang-title="CHECKBOX_CHECKED" title="Completed Task" onclick="insertMarkdown('- [x] ')"><span class="material-symbols-rounded">check_box</span></button>
         
         <!-- Code -->
-        <button class="actionbar-btn" onclick="insertMarkdown('`', '`')"><span class="material-symbols-rounded">code</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('```\n', '\n```')"><span class="material-symbols-rounded">data_object</span></button>
+        <button class="actionbar-btn" data-lang-title="CODE" title="Code" onclick="insertMarkdown('`', '`')"><span class="material-symbols-rounded">code</span></button>
+        <button class="actionbar-btn" data-lang-title="CODE_BLOCK" title="Code Block" onclick="insertMarkdown('```\n', '\n```')"><span class="material-symbols-rounded">data_object</span></button>
         
     <!-- Links and Media -->
-    <button class="actionbar-btn" onclick="insertMarkdown('[', '](url)')">
+    <button class="actionbar-btn" data-lang-title="LINK" title="Link" onclick="insertMarkdown('[', '](url)')">
         <span class="material-symbols-rounded">link</span>
     </button>
-    <button id="imageButton" class="actionbar-btn">
+    <button id="imageButton" class="actionbar-btn" data-lang-title="IMAGE" title="Image">
         <span class="material-symbols-rounded">image</span>
     </button>
         
         <!-- Quotes and Dividers -->
-        <button class="actionbar-btn" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
-        <button class="actionbar-btn" onclick="insertMarkdown('\n---\n')"><span class="material-symbols-rounded">horizontal_rule</span></button>
+        <button class="actionbar-btn" data-lang-title="QUOTE" title="Quote" onclick="insertMarkdown('> ')"><span class="material-symbols-rounded">format_quote</span></button>
+        <button class="actionbar-btn" data-lang-title="DIVIDER" title="Divider" onclick="insertMarkdown('\n---\n')"><span class="material-symbols-rounded">horizontal_rule</span></button>
         
         <!-- Tables -->
-        <button class="actionbar-btn" onclick="insertTable()"><span class="material-symbols-rounded">table</span></button>
+        <button class="actionbar-btn" data-lang-title="TABLE" title="Table" onclick="insertTable()"><span class="material-symbols-rounded">table</span></button>
         
         <!-- File Operations and Undo Redo -->
-        <button class="actionbar-btn" id="undoButton" disabled><span class="material-symbols-rounded">undo</span></button>
-        <button class="actionbar-btn" id="redoButton" disabled><span class="material-symbols-rounded">redo</span></button>
-        <button class="actionbar-btn" onclick="saveDocument()"><span class="material-symbols-rounded">save</span></button>
-        <button id="openFileBtn" class="actionbar-btn"><span class="material-symbols-rounded">folder_open</span></button>
+        <button class="actionbar-btn" id="undoButton" data-lang-title="UNDO" title="Undo" disabled><span class="material-symbols-rounded">undo</span></button>
+        <button class="actionbar-btn" id="redoButton" data-lang-title="REDO" title="Redo" disabled><span class="material-symbols-rounded">redo</span></button>
+        <button class="actionbar-btn" data-lang-title="SAVE" title="Save" onclick="saveDocument()"><span class="material-symbols-rounded">save</span></button>
+        <button id="openFileBtn" class="actionbar-btn" data-lang-title="OPEN_FILE" title="Open"><span class="material-symbols-rounded">folder_open</span></button>
     </div>
     
     <div class="editor-container">
@@ -438,13 +498,14 @@ function insertTable() {
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
             const chars = text.length;
             
-            wordCountElement.textContent = `Words: ${words}`;
-            charCountElement.textContent = `Characters: ${chars}`;
+            wordCountElement.textContent = t('WORDS', { count: words });
+            charCountElement.textContent = t('CHARACTERS', { count: chars });
         }
 
 function saveDocument() {
     const timestamp = new Date().toISOString().slice(0,10);
-    const filename = prompt('Enter filename:', `document-${timestamp}.md`);
+    const defaultName = t('DEFAULT_FILENAME', { timestamp });
+    const filename = prompt(t('SAVE_FILENAME_PROMPT'), defaultName);
     if (!filename) return;
 
     // Replace image IDs with their base64 data for saving
@@ -496,6 +557,7 @@ editor.addEventListener('input', function() {
 previewToggle.addEventListener('click', function() {
     isPreviewMode = !isPreviewMode;
     previewToggle.classList.toggle('active');
+    previewToggle.title = isPreviewMode ? t('EDIT') : t('PREVIEW');
     
     const toggleIcon = previewToggle.querySelector('.material-symbols-rounded');
     
@@ -550,7 +612,7 @@ window.addEventListener('load', function() {
 document.addEventListener('DOMContentLoaded', function() {    
     document.getElementById('imageButton').addEventListener('click', async () => {
         try {
-            const files = await Gurasuraisu.requestFile({ accept: 'image/*', multiple: false });
+            const files = await Polygol.requestFile({ accept: 'image/*', multiple: false });
             if (files && files.length > 0) {
                 const file = files[0];
                 const reader = new FileReader();
@@ -577,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('openFileBtn').addEventListener('click', async () => {
         try {
-            const files = await Gurasuraisu.requestFile({ accept: '.md,.txt', multiple: false });
+            const files = await Polygol.requestFile({ accept: '.md,.txt', multiple: false });
             if (files && files.length > 0) {
                 const file = files[0];
                 const reader = new FileReader();
